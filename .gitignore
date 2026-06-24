@@ -1,0 +1,20 @@
+# Build artifacts
+node_modules/
+*.log
+.DS_Store
+
+# OS
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+
+# Local scratch
+scratch_*.json
+test_script.js
+shot_*.png
+screenshot_*.png
+
+# GitHub Pages
+.hugo_build.lock
