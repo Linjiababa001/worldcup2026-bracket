@@ -244,6 +244,7 @@ main { max-width: 1400px; margin: 0 auto; padding: 16px; }
   border-radius: 8px; overflow: hidden; cursor: pointer; transition: all .2s;
   flex-shrink: 0;
   position: relative; z-index: 2;
+  min-height: 56px;
 }
 .mc:hover { border-color: var(--gold); box-shadow: var(--shadow-md); transform: translateY(-1px); }
 .mc.has-winner { border-color: var(--gold); }
@@ -906,18 +907,21 @@ function syncBracketSlots() {
 function makeRound(matchIds, title, cellH) {
   const col = document.createElement('div');
   col.className = 'b-round';
+  col.style.position = 'relative';
   const hdr = document.createElement('div');
   hdr.className = 'b-round-title';
   hdr.textContent = title;
   col.appendChild(hdr);
+  // each match gets a slot of height = cellH within the column
   matchIds.forEach((id, i) => {
     const cell = document.createElement('div');
     cell.className = 'b-cell';
-    cell.style.height = (cellH-6)+'px';
-    cell.style.justifyContent = 'center';
+    cell.style.height = cellH + 'px';
+    cell.style.position = 'relative';
     const card = mCard(id);
     card.style.position = 'absolute';
-    card.style.top = (28 + i * cellH + (cellH-30)/2)+'px';
+    card.style.top = ((cellH - 56) / 2) + 'px';  // 56 ≈ card content height
+    card.style.left = '6px';
     cell.appendChild(card);
     col.appendChild(cell);
   });
@@ -955,7 +959,7 @@ function renderBracket() {
   const rightQF  = Array.from({length:2},(_,i)=>`QF_R${i}`);
   const rightR16 = Array.from({length:4},(_,i)=>`R16_R${i}`);
   const rightR32 = Array.from({length:8},(_,i)=>`R32_R${i}`);
-  const baseH = 38;
+  const baseH = 130;  // 增大基础高度，让32强每个对战区间距拉开，完整显示可填入球队
 
   // columns in order: L R32, L R16, L QF, L SF, center, R SF, R QF, R R16, R R32
   const colsL = [
@@ -964,43 +968,29 @@ function renderBracket() {
     makeRound(leftQF,'八强 · 上半区',baseH*4),
     makeRound(leftSF,'四强 · 上半区',baseH*8),
   ];
-  // Center column
+  // Center column — same total height as SF column (baseH*8) for alignment
   const center = document.createElement('div');
   center.className = 'b-center';
-  center.style.minHeight = (baseH*8+40)+'px';
-  const finalCell = document.createElement('div');
-  finalCell.className = 'b-cell';
-  finalCell.style.position = 'relative';
-  finalCell.style.height = '60px';
-  finalCell.style.width = '180px';
-  const fCard = mCard('F0','final-mc');
-  fCard.style.position = 'absolute';
-  fCard.style.top = '20px';
-  fCard.style.left = '6px';
-  finalCell.appendChild(fCard);
-  center.appendChild(finalCell);
+  center.style.minHeight = (baseH*8)+'px';
+  center.style.justifyContent = 'center';
+  center.style.gap = '24px';
 
+  // Final match card
+  const fCard = mCard('F0','final-mc');
+  fCard.style.position = 'relative';
+  center.appendChild(fCard);
+
+  // Champion box
   const w = AM['F0'].winner;
   const champ = document.createElement('div');
   champ.className = 'champion-box';
   champ.innerHTML = `<div class="champion-icon">🏆</div><div class="champion-label">2026 世界杯冠军</div><div class="champion-name">${w?w.name:'<span style="color:var(--text-soft);font-style:italic">待预测</span>'}</div>`;
   center.appendChild(champ);
 
-  const thirdSep = document.createElement('div');
-  thirdSep.className = 'third-sep';
-  thirdSep.textContent = '🥉 季军赛';
-  center.appendChild(thirdSep);
-  const thirdCell = document.createElement('div');
-  thirdCell.className = 'b-cell';
-  thirdCell.style.position = 'relative';
-  thirdCell.style.height = '60px';
-  thirdCell.style.width = '180px';
+  // 3rd place match
   const tCard = mCard('3RD');
-  tCard.style.position = 'absolute';
-  tCard.style.top = '0';
-  tCard.style.left = '6px';
-  thirdCell.appendChild(tCard);
-  center.appendChild(thirdCell);
+  tCard.style.position = 'relative';
+  center.appendChild(tCard);
 
   const colsR = [
     makeRound(rightSF,'四强 · 下半区',baseH*8),
