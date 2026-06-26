@@ -868,31 +868,37 @@ function switchBracketHalf(half, btn) {
 // ======================================================
 function initMatches() {
   AM = {};
-  for (let i=0;i<16;i++) {
+  // Left/Upper half: R32_PAIRINGS[0..7] → 8 R32 → 4 R16 → 2 QF → 1 SF
+  for (let i=0;i<8;i++) {
     const [hs,as] = R32_PAIRINGS[i];
     AM[`R32_L${i}`] = { id:`R32_L${i}`, homeSlot:hs, awaySlot:as, homeTeam: PRED[hs] ? {...PRED[hs]}:null, awayTeam: PRED[as] ? {...PRED[as]}:null, winner:null };
   }
-  for (let i=0;i<8;i++) { AM[`R16_L${i}`]={id:`R16_L${i}`,homeTeam:null,awayTeam:null,winner:null}; }
-  for (let i=0;i<4;i++) { AM[`QF_L${i}`]={id:`QF_L${i}`,homeTeam:null,awayTeam:null,winner:null}; }
+  for (let i=0;i<4;i++) { AM[`R16_L${i}`]={id:`R16_L${i}`,homeTeam:null,awayTeam:null,winner:null}; }
+  for (let i=0;i<2;i++) { AM[`QF_L${i}`]={id:`QF_L${i}`,homeTeam:null,awayTeam:null,winner:null}; }
   AM['SF_L0']={id:'SF_L0',homeTeam:null,awayTeam:null,winner:null};
-  AM['SF_L1']={id:'SF_L1',homeTeam:null,awayTeam:null,winner:null};
   AM['F0']={id:'F0',homeTeam:null,awayTeam:null,winner:null};
   AM['3RD']={id:'3RD',homeTeam:null,awayTeam:null,winner:null};
-  for (let i=0;i<16;i++) {
-    const [hs,as] = R32_PAIRINGS[i];
+  // Right/Lower half: R32_PAIRINGS[8..15] → 8 R32 → 4 R16 → 2 QF → 1 SF
+  for (let i=0;i<8;i++) {
+    const [hs,as] = R32_PAIRINGS[i+8];
     AM[`R32_R${i}`] = { id:`R32_R${i}`, homeSlot:hs, awaySlot:as, homeTeam: PRED[hs] ? {...PRED[hs]}:null, awayTeam: PRED[as] ? {...PRED[as]}:null, winner:null };
   }
-  for (let i=0;i<8;i++) { AM[`R16_R${i}`]={id:`R16_R${i}`,homeTeam:null,awayTeam:null,winner:null}; }
-  for (let i=0;i<4;i++) { AM[`QF_R${i}`]={id:`QF_R${i}`,homeTeam:null,awayTeam:null,winner:null}; }
+  for (let i=0;i<4;i++) { AM[`R16_R${i}`]={id:`R16_R${i}`,homeTeam:null,awayTeam:null,winner:null}; }
+  for (let i=0;i<2;i++) { AM[`QF_R${i}`]={id:`QF_R${i}`,homeTeam:null,awayTeam:null,winner:null}; }
   AM['SF_R0']={id:'SF_R0',homeTeam:null,awayTeam:null,winner:null};
-  AM['SF_R1']={id:'SF_R1',homeTeam:null,awayTeam:null,winner:null};
 }
 
 function syncBracketSlots() {
-  for (let i=0;i<16;i++) {
+  // Left: R32_PAIRINGS[0..7]
+  for (let i=0;i<8;i++) {
     const [hs,as] = R32_PAIRINGS[i];
-    const mL = AM[`R32_L${i}`], mR = AM[`R32_R${i}`];
+    const mL = AM[`R32_L${i}`];
     if (mL) { mL.homeSlot=hs; mL.awaySlot=as; mL.homeTeam=PRED[hs]?{...PRED[hs]}:null; mL.awayTeam=PRED[as]?{...PRED[as]}:null; }
+  }
+  // Right: R32_PAIRINGS[8..15]
+  for (let i=0;i<8;i++) {
+    const [hs,as] = R32_PAIRINGS[i+8];
+    const mR = AM[`R32_R${i}`];
     if (mR) { mR.homeSlot=hs; mR.awaySlot=as; mR.homeTeam=PRED[hs]?{...PRED[hs]}:null; mR.awayTeam=PRED[as]?{...PRED[as]}:null; }
   }
 }
@@ -941,14 +947,14 @@ function renderBracket() {
   const flex = document.getElementById('bracket-flex');
   flex.innerHTML = '';
   // generate base layout structure (full)
-  const leftR32  = Array.from({length:16},(_,i)=>`R32_L${i}`);
-  const leftR16  = Array.from({length:8},(_,i)=>`R16_L${i}`);
-  const leftQF   = Array.from({length:4},(_,i)=>`QF_L${i}`);
-  const leftSF   = ['SF_L0','SF_L1'];
-  const rightSF  = ['SF_R0','SF_R1'];
-  const rightQF  = Array.from({length:4},(_,i)=>`QF_R${i}`);
-  const rightR16 = Array.from({length:8},(_,i)=>`R16_R${i}`);
-  const rightR32 = Array.from({length:16},(_,i)=>`R32_R${i}`);
+  const leftR32  = Array.from({length:8},(_,i)=>`R32_L${i}`);
+  const leftR16  = Array.from({length:4},(_,i)=>`R16_L${i}`);
+  const leftQF   = Array.from({length:2},(_,i)=>`QF_L${i}`);
+  const leftSF   = ['SF_L0'];
+  const rightSF  = ['SF_R0'];
+  const rightQF  = Array.from({length:2},(_,i)=>`QF_R${i}`);
+  const rightR16 = Array.from({length:4},(_,i)=>`R16_R${i}`);
+  const rightR32 = Array.from({length:8},(_,i)=>`R32_R${i}`);
   const baseH = 38;
 
   // columns in order: L R32, L R16, L QF, L SF, center, R SF, R QF, R R16, R R32
@@ -961,7 +967,7 @@ function renderBracket() {
   // Center column
   const center = document.createElement('div');
   center.className = 'b-center';
-  center.style.minHeight = (baseH*16+40)+'px';
+  center.style.minHeight = (baseH*8+40)+'px';
   const finalCell = document.createElement('div');
   finalCell.className = 'b-cell';
   finalCell.style.position = 'relative';
@@ -1050,7 +1056,7 @@ function updateProg() {
   for (const k in AM) {
     if (AM[k].winner) filled++;
   }
-  const total = 63; // 32 + 16 + 8 + 4 + 2 + 1 = 63
+  const total = 32; // 16 R32 + 8 R16 + 4 QF + 2 SF + 1 Final + 1 3rd
   const pct = Math.round(filled/total*100);
   document.getElementById('prog-bar').style.width = pct+'%';
   document.getElementById('prog-count').textContent = filled+' / '+total;
@@ -1166,15 +1172,15 @@ function drawLines() {
   svg.setAttribute('height', flex.scrollHeight);
   // Build column map
   const columns = [
-    ['R32_L0',16,'R16_L'],
-    ['R16_L0',8,'QF_L'],
-    ['QF_L0',4,'SF_L'],
-    ['SF_L0',2,'F0'],
+    ['R32_L0',8,'R16_L'],
+    ['R16_L0',4,'QF_L'],
+    ['QF_L0',2,'SF_L'],
+    ['SF_L0',1,'F0'],
     ['F0',1,null],
-    ['SF_R0',2,null],
-    ['QF_R0',4,null],
-    ['R16_R0',8,null],
-    ['R32_R0',16,null],
+    ['SF_R0',1,null],
+    ['QF_R0',2,null],
+    ['R16_R0',4,null],
+    ['R32_R0',8,null],
   ];
   // Draw lines between successive rounds on each side
   function drawSide(cols) {
@@ -1209,30 +1215,28 @@ function drawLines() {
       }
     }
   }
-  // Left side: R32_L → R16_L → QF_L → SF_L
+  // Left side: R32_L(8) → R16_L(4) → QF_L(2) → SF_L(1) → F0
   drawSide([
-    { prefix: 'R32_L', count: 16, nextPrefix: 'R16_L' },
-    { prefix: 'R16_L', count: 8,  nextPrefix: 'QF_L' },
-    { prefix: 'QF_L',  count: 4,  nextPrefix: 'SF_L' },
-    { prefix: 'SF_L',  count: 2,  nextPrefix: 'F0' },
-    { prefix: 'F0',    count: 1,  nextPrefix: null },
+    { prefix: 'R32_L', count: 8, nextPrefix: 'R16_L' },
+    { prefix: 'R16_L', count: 4, nextPrefix: 'QF_L' },
+    { prefix: 'QF_L',  count: 2, nextPrefix: 'SF_L' },
+    { prefix: 'SF_L',  count: 1, nextPrefix: 'F0' },
+    { prefix: 'F0',    count: 1, nextPrefix: null },
   ]);
-  // Right side: R32_R → R16_R → QF_R → SF_R → F0
+  // Right side: R32_R(8) → R16_R(4) → QF_R(2) → SF_R(1) → F0
   drawSide([
-    { prefix: 'R32_R', count: 16, nextPrefix: 'R16_R' },
-    { prefix: 'R16_R', count: 8,  nextPrefix: 'QF_R' },
-    { prefix: 'QF_R',  count: 4,  nextPrefix: 'SF_R' },
-    { prefix: 'SF_R',  count: 2,  nextPrefix: 'F0' },
-    { prefix: 'F0',    count: 1,  nextPrefix: null },
+    { prefix: 'R32_R', count: 8, nextPrefix: 'R16_R' },
+    { prefix: 'R16_R', count: 4, nextPrefix: 'QF_R' },
+    { prefix: 'QF_R',  count: 2, nextPrefix: 'SF_R' },
+    { prefix: 'SF_R',  count: 1, nextPrefix: 'F0' },
+    { prefix: 'F0',    count: 1, nextPrefix: null },
   ]);
   // Also draw 3rd place from SF losers
   const sfL0 = document.querySelector(`.mc[data-mid="SF_L0"]`);
-  const sfL1 = document.querySelector(`.mc[data-mid="SF_L1"]`);
   const sfR0 = document.querySelector(`.mc[data-mid="SF_R0"]`);
-  const sfR1 = document.querySelector(`.mc[data-mid="SF_R1"]`);
   const third = document.querySelector(`.mc[data-mid="3RD"]`);
   if (third) {
-    [sfL0,sfL1,sfR0,sfR1].forEach(sf => {
+    [sfL0,sfR0].forEach(sf => {
       if (!sf) return;
       const a = sf.getBoundingClientRect();
       const b = third.getBoundingClientRect();
@@ -1316,20 +1320,14 @@ function propagate(matchId) {
   const map = {
     'R32_L0':'R16_L0','R32_L1':'R16_L0','R32_L2':'R16_L1','R32_L3':'R16_L1',
     'R32_L4':'R16_L2','R32_L5':'R16_L2','R32_L6':'R16_L3','R32_L7':'R16_L3',
-    'R32_L8':'R16_L4','R32_L9':'R16_L4','R32_L10':'R16_L5','R32_L11':'R16_L5',
-    'R32_L12':'R16_L6','R32_L13':'R16_L6','R32_L14':'R16_L7','R32_L15':'R16_L7',
     'R16_L0':'QF_L0','R16_L1':'QF_L0','R16_L2':'QF_L1','R16_L3':'QF_L1',
-    'R16_L4':'QF_L2','R16_L5':'QF_L2','R16_L6':'QF_L3','R16_L7':'QF_L3',
-    'QF_L0':'SF_L0','QF_L1':'SF_L0','QF_L2':'SF_L1','QF_L3':'SF_L1',
-    'SF_L0':'F0','SF_L1':'F0',
+    'QF_L0':'SF_L0','QF_L1':'SF_L0',
+    'SF_L0':'F0',
     'R32_R0':'R16_R0','R32_R1':'R16_R0','R32_R2':'R16_R1','R32_R3':'R16_R1',
     'R32_R4':'R16_R2','R32_R5':'R16_R2','R32_R6':'R16_R3','R32_R7':'R16_R3',
-    'R32_R8':'R16_R4','R32_R9':'R16_R4','R32_R10':'R16_R5','R32_R11':'R16_R5',
-    'R32_R12':'R16_R6','R32_R13':'R16_R6','R32_R14':'R16_R7','R32_R15':'R16_R7',
     'R16_R0':'QF_R0','R16_R1':'QF_R0','R16_R2':'QF_R1','R16_R3':'QF_R1',
-    'R16_R4':'QF_R2','R16_R5':'QF_R2','R16_R6':'QF_R3','R16_R7':'QF_R3',
-    'QF_R0':'SF_R0','QF_R1':'SF_R0','QF_R2':'SF_R1','QF_R3':'SF_R1',
-    'SF_R0':'F0','SF_R1':'F0',
+    'QF_R0':'SF_R0','QF_R1':'SF_R0',
+    'SF_R0':'F0',
   };
   const nextId = map[matchId];
   if (!nextId || !AM[nextId]) return;
@@ -1349,7 +1347,8 @@ function propagate(matchId) {
     const downMap = {
       'R16_L0':'QF_L0','R16_L1':'QF_L0','R16_L2':'QF_L1','R16_L3':'QF_L1',
       'QF_L0':'SF_L0','QF_L1':'SF_L0','SF_L0':'F0',
-      'R16_R0':'QF_R0','R16_R1':'QF_R0','QF_R0':'SF_R0','SF_R0':'F0',
+      'R16_R0':'QF_R0','R16_R1':'QF_R0','R16_R2':'QF_R1','R16_R3':'QF_R1',
+      'QF_R0':'SF_R0','QF_R1':'SF_R0','SF_R0':'F0',
     };
     const dn = downMap[nextId];
     if (dn && AM[dn]) { AM[dn].winner = null; }
